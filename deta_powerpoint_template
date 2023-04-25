@@ -1,0 +1,81 @@
+esphome:
+  name: pc191ha-108
+
+libretuya:
+  board: wb2s
+  framework:
+    version: dev
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+
+ota:
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "pc191ha-108 Fallback Hotspot"
+
+captive_portal:
+    
+web_server:
+  port: 80
+
+#
+# PC191HA configuration 
+
+binary_sensor:        # button   (bt1_pin: 11)
+  - platform: gpio
+    pin: P11
+    name: "pc191ha-108_button"
+    id:   pc191ha_108_button
+    device_class: window
+    on_press:
+      then:
+        - switch.toggle: pc191ha_108_relay  # toggle the relay
+
+light:                # LED in the button  (led1_pin: 26)
+  - platform: status_led
+    name: "pc191ha-108 Switch state"
+    id:   pc191ha_108_led
+    pin: P26
+
+switch:              # relay    (rl1_pin: 6)
+  - platform: gpio
+    pin: P6
+    name: "pc191ha-108_relay"
+    id:   pc191ha_108_relay
+    on_turn_on:
+      then:
+        - light.turn_on: pc191ha_108_led
+    on_turn_off:
+      then:
+        - light.turn_off: pc191ha_108_led
+
+# Example configuration entry for device BL0937 using inverted SEL pin functionality
+sensor:
+  - platform: hlw8012
+    model: BL0937
+    sel_pin:
+      inverted: true
+      number: P24
+    cf_pin: 
+      inverted: true  # the logic of BL0937 is opposite from HLW8012
+      number: P7
+    cf1_pin: 
+      inverted: true  # the logic of BL0937 is opposite from HLW8012
+      number: P8
+    current:
+      name: "pc191ha-108 Current"
+    voltage:
+      name: "pc191ha-108 Voltage"
+    power:
+      name: "pc191ha-108 Power"
+    update_interval: 10s
+    change_mode_every: 3
